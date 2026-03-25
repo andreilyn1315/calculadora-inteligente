@@ -1,0 +1,68 @@
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+#t1 {
+    color: white;
+    background-color: black;
+    text-align: center;
+    width: 100%;
+    margin: 0px;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    box-shadow: brown 0px 6px 10px;
+
+}
+
+#d1 {
+    text-align: center;
+    color: brown;
+    font-family: 'poppins', sans-serif;
+    text-shadow: 1px 1px 5px black;
+
+}
+
+.entradas {
+    text-align: center;
+    display: block;
+    margin: 5px auto;
+    border-radius: 10px;
+}
+
+#b1 {
+    color: brown;
+    display: block;
+    margin: 5px auto;
+    background-color: black;
+    text-decoration: none;
+    border-radius: 10px;
+    
+
+}
+
+#b1:hover {
+    background-color: brown;
+    color: black;
+    cursor: pointer;
+}
+#resultado {
+    text-align: center;
+    color: brown;
+    
+}
+
+.pasos {
+    text-align: center;
+    color: brown;
+    font-family: 'poppins', sans-serif;
+    text-shadow: 1px 1px 5px black;
+}
+
+#tresultado {
+    text-align: center;
+    color: brown;
+    font-family: 'poppins', sans-serif;
+    text-shadow: 1px 1px 5px black;
+}
