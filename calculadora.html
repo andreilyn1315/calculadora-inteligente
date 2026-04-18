@@ -8,42 +8,53 @@
 </head>
 <body>
     <h1 id="t1">Calculadora Inteligente</h1>
-    <h3 id="d1" >Bienvenido a la calculadora inteligente!</h3>
-    <input  class="entradas" type="text" id="ecuacion" placeholder="ingresa tu ecuacion">
+    <h3 id="d1">Bienvenido a la calculadora inteligente!</h3>
+
+    <input class="entradas" type="text" id="ecuacion" placeholder="ingresa tu ecuacion">
     <br>
-    <button  id="b1" onclick="resolver()">calcular</button>
+
+    <button id="b1" onclick="resolver()">calcular</button>
     <br>
-    <h3 id="tresultado">resultado :</h3>
+
+    <h3 id="tresultado">Pasos:</h3>
     <div id="resultado"></div>
 
-   <script>
-function resolver() {
-    let ecuacion = document.getElementById("ecuacion").value;
-    let contenedor = document.getElementById("resultado");
+<script>
+    console.log("JS cargado");
 
-    // Limpiar resultados anteriores
-    contenedor.innerHTML = "";
+    function resolver() {
+        console.log("BOTON FUNCIONA");
 
-    // 🔥 SIMULACIÓN (por ahora fija)
-    let pasos = [
-        ecuacion,
-        "Restamos 3 en ambos lados",
-        "2x = 4",
-        "Dividimos entre 2",
-        "x = 2"
-    ];
+        let ecuacion = document.getElementById("ecuacion").value;
+        let contenedor = document.getElementById("resultado");
 
-    // Mostrar pasos dinámicamente
-    pasos.forEach(paso => {
-        let p = document.createElement("p");
-        p.innerText = paso;
-        contenedor.appendChild(p);
-    });
-}
+        // Limpiar resultados anteriores
+        contenedor.innerHTML = "";
+
+        fetch("http://127.0.0.1:5000/resolver", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ ecuacion: ecuacion })
+        })
+
+        .then(response => response.json())
+        .then(data => {
+            data.pasos.forEach(paso => {
+                let p = document.createElement("p");
+                p.innerText = paso;
+                contenedor.appendChild(p);
+            });
+        })
+
+        .catch(error => {
+            console.error("Error:", error);
+        });
+    }
 </script>
 
-<div class="pasos">
-</div>
+<div class="pasos"></div>
 
 </body>
 </html>
