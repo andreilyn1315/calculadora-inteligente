@@ -22,6 +22,10 @@
 <script>
     console.log("JS cargado");
 
+    window.onload = function() {
+        document.getElementById("ecuacion").focus();
+    };
+
     function resolver() {
         console.log("BOTON FUNCIONA");
 
@@ -30,6 +34,9 @@
 
         // Limpiar resultados anteriores
         contenedor.innerHTML = "";
+
+        // Mensaje inicial
+        contenedor.innerHTML = "<p>Calculando...</p>";
 
         fetch("http://127.0.0.1:5000/resolver", {
             method: "POST",
@@ -41,17 +48,40 @@
 
         .then(response => response.json())
         .then(data => {
-            data.pasos.forEach(paso => {
-                let p = document.createElement("p");
-                p.innerText = paso;
-                contenedor.appendChild(p);
-            });
+            setTimeout(() => {
+                contenedor.innerHTML = ""; // quitar "Calculando..."
+
+                let i = 0;
+
+                function mostrarPaso() {
+                    if (i < data.pasos.length) {
+                        let p = document.createElement("p");
+                        p.innerText = data.pasos[i];
+                        contenedor.appendChild(p);
+
+                        i++;
+                        setTimeout(mostrarPaso, 500); // velocidad (ajústala si quieres)
+                    }
+                }
+
+                mostrarPaso();
+
+            }, 500); // pequeño delay inicial
+            document.getElementById("ecuacion").value = "";
         })
 
         .catch(error => {
             console.error("Error:", error);
         });
     }
+
+        document.getElementById("ecuacion").addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // evita comportamientos raros
+            resolver();
+        }
+    });
+
 </script>
 
 <div class="pasos"></div>

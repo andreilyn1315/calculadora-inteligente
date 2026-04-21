@@ -1,75 +1,89 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import re
 
 app = Flask(__name__)
 CORS(app)
 
+# 🔧 separar términos
+def separar_terminos(expresion):
+    return re.findall(r'[+-]?\d*x|[+-]?\d+', expresion)
+
 def resolver_ecuacion(ecuacion):
     pasos = []
 
-    ecuacion = ecuacion.replace(" ", "")
-    pasos.append("Ecuación original: " + ecuacion)
+    if "=" not in ecuacion:
+        return ["Error: la ecuación debe tener '='"]
 
-    izq, der = ecuacion.split("=")
+    if "x" not in ecuacion:
+        return ["Error: la ecuación debe tener una variable 'x'"]
 
-    pasos.append(f"{izq} = {der}")
+    try:
+        ecuacion = ecuacion.replace(" ", "")
+        pasos.append(f"Ecuación original: {ecuacion}")
+        pasos.append("Queremos dejar la x completamente sola")
 
-    # separar términos
-    def separar(expresion):
-        expresion = expresion.replace("-", "+-")
-        return expresion.split("+")
+        izq, der = ecuacion.split("=")
 
-    izq_terminos = separar(izq)
-    der_terminos = separar(der)
+        match = re.match(r'([+-]?\d*)x([+-]\d+)?', izq)
 
-    a = 0  # coeficiente de x
-    b = 0  # números
+        if not match:
+            return ["Error: formato no soportado (usa algo como 2x+3=7)"]
 
-    # procesar lado izquierdo
-    for t in izq_terminos:
-        if "x" in t:
-            if t == "x":
-                a += 1
-            elif t == "-x":
-                a -= 1
-            else:
-                a += int(t.replace("x", ""))
-        elif t != "":
-            b -= int(t)
+        coef = match.group(1)
+        constante = match.group(2)
 
-    # procesar lado derecho
-    for t in der_terminos:
-        if "x" in t:
-            if t == "x":
-                a -= 1
-            elif t == "-x":
-                a += 1
-            else:
-                a -= int(t.replace("x", ""))
-        elif t != "":
-            b += int(t)
-
-    pasos.append(f"{a}x = {b}")
-
-    # casos especiales
-    if a == 0:
-        if b == 0:
-            pasos.append("Infinitas soluciones")
+        # coeficiente de x
+        if coef in ["", "+"]:
+            a = 1
+        elif coef == "-":
+            a = -1
         else:
-            pasos.append("No tiene solución")
+            a = int(coef)
+
+        # constante
+        b_izq = int(constante) if constante else 0
+        b_der = int(der)
+
+        # 🔹 PASO 1: eliminar constante
+        if b_izq > 0:
+            pasos.append(f"El {b_izq} está sumando, así que hacemos lo contrario")
+            pasos.append(f"Restamos {b_izq} en ambos lados")
+            nuevo_der = b_der - b_izq
+        elif b_izq < 0:
+            pasos.append(f"El {abs(b_izq)} está restando, así que hacemos lo contrario")
+            pasos.append(f"Sumamos {abs(b_izq)} en ambos lados")
+            nuevo_der = b_der + abs(b_izq)
+        else:
+            nuevo_der = b_der
+
+        pasos.append(f"{a}x = {nuevo_der}")
+
+        # 🔹 PASO 2: dividir
+        if a != 1:
+            pasos.append(f"El {a} está multiplicando a x")
+            pasos.append("Hacemos la operación contraria")
+            pasos.append(f"Dividimos ambos lados entre {a}")
+
+        x = nuevo_der / a
+
+        if x.is_integer():
+            x = int(x)
+
+        pasos.append(f"x = {x}")
+        pasos.append("Listo, hemos encontrado el valor de x 🎉")
+
         return pasos
 
-    # resolver
-    x = b / a
-    pasos.append(f"x = {x}")
+    except Exception as e:
+        print("💥 Error interno:", e)
+        return ["Error: no se pudo procesar la ecuación"]
 
-    return pasos
-
-# 🌐 ruta del servidor
+# 🌐 ESTE ERA EL QUE TE FALTABA
 @app.route("/resolver", methods=["POST"])
 def resolver():
     data = request.get_json()
-    ecuacion = data["ecuacion"]
+    ecuacion = data.get("ecuacion", "")
 
     pasos = resolver_ecuacion(ecuacion)
 
