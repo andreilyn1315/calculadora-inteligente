@@ -5,6 +5,11 @@ import re
 app = Flask(__name__)
 CORS(app)
 
+# 🌐 ruta base (para que no salga 404 en Render)
+@app.route("/")
+def home():
+    return "🚀 Calculadora Inteligente API funcionando"
+
 # 🔧 separar términos
 def separar_terminos(expresion):
     return re.findall(r'[+-]?\d*x|[+-]?\d+', expresion)
@@ -67,7 +72,7 @@ def resolver_ecuacion(ecuacion):
 
         x = nuevo_der / a
 
-        if x.is_integer():
+        if isinstance(x, float) and x.is_integer():
             x = int(x)
 
         pasos.append(f"x = {x}")
@@ -79,7 +84,7 @@ def resolver_ecuacion(ecuacion):
         print("💥 Error interno:", e)
         return ["Error: no se pudo procesar la ecuación"]
 
-# 🌐 ESTE ERA EL QUE TE FALTABA
+# 🌐 endpoint principal
 @app.route("/resolver", methods=["POST"])
 def resolver():
     data = request.get_json()
@@ -91,6 +96,6 @@ def resolver():
         "pasos": pasos
     })
 
-# 🚀 iniciar servidor
+# 🚀 iniciar servidor (solo local, Render usa gunicorn)
 if __name__ == "__main__":
     app.run(debug=True)
