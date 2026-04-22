@@ -22,9 +22,19 @@
 <script>
     console.log("JS cargado");
 
-    window.onload = function() {
+    // 👇 esperar que todo cargue (más seguro en GitHub Pages)
+    document.addEventListener("DOMContentLoaded", function () {
+
         document.getElementById("ecuacion").focus();
-    };
+
+        document.getElementById("ecuacion").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                resolver();
+            }
+        });
+
+    });
 
     function resolver() {
         console.log("BOTON FUNCIONA");
@@ -32,10 +42,12 @@
         let ecuacion = document.getElementById("ecuacion").value;
         let contenedor = document.getElementById("resultado");
 
-        // Limpiar resultados anteriores
-        contenedor.innerHTML = "";
+        // validar input vacío
+        if (ecuacion.trim() === "") {
+            contenedor.innerHTML = "<p>⚠️ escribe una ecuación</p>";
+            return;
+        }
 
-        // Mensaje inicial
         contenedor.innerHTML = "<p>Calculando...</p>";
 
         fetch("https://calculadora-inteligente-uulb.onrender.com/resolver", {
@@ -45,11 +57,10 @@
             },
             body: JSON.stringify({ ecuacion: ecuacion })
         })
-
         .then(response => response.json())
         .then(data => {
             setTimeout(() => {
-                contenedor.innerHTML = ""; // quitar "Calculando..."
+                contenedor.innerHTML = "";
 
                 let i = 0;
 
@@ -60,31 +71,23 @@
                         contenedor.appendChild(p);
 
                         i++;
-                        setTimeout(mostrarPaso, 500); // velocidad (ajústala si quieres)
+                        setTimeout(mostrarPaso, 500);
                     }
                 }
 
                 mostrarPaso();
 
-            }, 500); // pequeño delay inicial
+            }, 500);
+
+            // limpiar input
             document.getElementById("ecuacion").value = "";
         })
-
         .catch(error => {
             console.error("Error:", error);
+            contenedor.innerHTML = "<p>❌ Error al conectar con el servidor</p>";
         });
     }
-
-        document.getElementById("ecuacion").addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-            event.preventDefault(); // evita comportamientos raros
-            resolver();
-        }
-    });
-
 </script>
-
-<div class="pasos"></div>
 
 </body>
 </html>
